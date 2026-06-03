@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Prompt 超市</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f5f6fa;
+  padding: 20px;
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+.container {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.card {
+  background: white;
+  padding: 16px;
+  width: 220px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.title {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.tag {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.rating {
+  color: orange;
+  margin-bottom: 10px;
+}
+
+button {
+  background: #0078d4;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<h2>Prompt 超市</h2>
+
+<select id="filter" onchange="render()">
+  <option value="all">全部</option>
+  <option value="写作">写作</option>
+  <option value="总结">总结</option>
+</select>
+
+<div class="container" id="list"></div>
+
+<script>
+const prompts = [
+  { id: 1, title: "总结助手", tag: "总结", rating: 4.8, votes: 10, text: "总结..." },
+  { id: 2, title: "写作助手", tag: "写作", rating: 4.5, votes: 8, text: "写作..." },
+  { id: 3, title: "高级总结", tag: "总结", rating: 5.0, votes: 5, text: "高级总结..." }
+];
+
+function render() {
+  const filter = document.getElementById("filter").value;
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  const filtered = prompts
+    .filter(p => filter === "all" || p.tag === filter)
+    .sort((a, b) => b.rating - a.rating);
+
+  filtered.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <div class="title">${p.title}</div>
+      <div class="tag">${p.tag}</div>
+      <div style="margin-bottom:8px;">评分：${p.rating.toFixed(1)}</div>
+
+      <select onchange="rate(${p.id}, this.value)">
+        <option value="">选择评分</option>
+        ${[1,2,3,4,5].map(n => `<option value="${n}">${n}</option>`).join("")}
+      </select>
+
+      <br><br>
+      <button onclick="copy('${p.text}')">复制</button>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+// ✅ 下拉评分
+function rate(id, score) {
+  const p = prompts.find(p => p.id === id);
+
+  score = Number(score);
+  if (!score) return;
+
+  p.rating = (p.rating * p.votes + score) / (p.votes + 1);
+  p.votes += 1;
+
+  render();
+}
+
+function copy(text) {
+  navigator.clipboard.writeText(text);
+  alert("已复制 ✅");
+}
+
+render();
+</script>
+
+</body>
+</html>
